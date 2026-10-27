@@ -8,7 +8,7 @@ See [local services and encrypted credentials](docs/local-services.md) for the p
 
 ## Start
 
-Requires Node.js 24+, Git, built sibling client/database checkouts and a local OpenAI-compatible model with tool calling. Before this feature is merged, use the matching feature PR branches in the orchestrator and each managed service; older main checkouts do not contain the new bootstrap endpoints.
+Requires Node.js 24+, Git, built sibling client/database checkouts and a local OpenAI-compatible model with tool calling. Use current main checkouts of the orchestrator and each managed service so all bootstrap endpoints are available.
 
 ```sh
 npm ci
@@ -22,7 +22,7 @@ npm start -- run --config config.default.yaml --names examples/names.json
 
 These commands work in Linux shells and PowerShell. Passphrases and provider tokens are entered through hidden terminal prompts, never command-line arguments. The generated storage API token lives in the encrypted vault. For a pre-existing external storage API, save its existing token with `npm run vault:set -- store` and disable managed startup of that service.
 
-Default ports are 4318 for storage, 4319 Wiktionary, 4320 Wikidata, 4321 Behind the Name and 4322 statistics. Etymology Explorer (4323) and Wikimedia Enterprise (4324) are reserved and disabled because their clients are not implemented. Etymology Explorer requires verified Vanguard API documentation before implementation.
+Default ports are 4318 for storage, 4319 Wiktionary, 4320 Wikidata, 4321 Behind the Name, 4322 statistics and 4323 Etymology Explorer. Etymology Explorer uses the confirmed staging API without a provider token. Wikimedia Enterprise (4324) remains reserved and disabled because its client is not implemented.
 
 The root milestone still finds roots only. Adaptations, borrowing and other enrichment phases are not automatically enabled by launching additional clients. Managed Wiktionary lookups use the configured local port while preserving the existing source/claim validation boundary. An actual model/GPU benchmark remains a local validation step.
 
