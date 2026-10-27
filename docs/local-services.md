@@ -11,7 +11,7 @@ The orchestrator owns the credential vault and the local process fleet. On start
 | Wikidata | 4320 | Implemented |
 | Behind the Name | 4321 | Implemented; provider key needed for lookups |
 | Official statistics | 4322 | Implemented |
-| Etymology Explorer | 4323 | Reserved, disabled pending verified Vanguard API documentation |
+| Etymology Explorer | 4323 | Implemented; anonymous staging reads |
 | Wikimedia Enterprise | 4324 | Reserved, unimplemented |
 
 Each implemented API project ships `config.default.yaml` with its standalone loopback port. The orchestrator's `config.default.yaml` is the launch registry: it supplies each enabled checkout directory and port, overrides that child's port at launch, and rejects collisions before starting anything. Edit this registry when choosing different managed ports. It accepts no credential values. Checkouts need `npm ci`/a completed build before startup.
@@ -64,7 +64,7 @@ Source API endpoints:
 | `GET /v1/tools` | Authenticated MCP tool descriptions |
 | `POST /v1/tools/TOOL_NAME` | Authenticated validated MCP call; body is the tool arguments object |
 
-The credential endpoint authenticates with `Authorization: Bearer CONTROL_CREDENTIAL`, accepts bounded JSON and never returns the credential. Behind the Name lookups return locked status until its token is loaded. Public Wiktionary/Wikidata/IBGE operations do not require a provider token; their endpoints can retain one in memory but do not send it to a public provider unnecessarily. Rotating/clearing a credential discards that epoch's MCP bridge/cache; a request whose upload crosses rotation must retry and cannot instantiate a revoked credential.
+The credential endpoint authenticates with `Authorization: Bearer CONTROL_CREDENTIAL`, accepts bounded JSON and never returns the credential. Behind the Name lookups return locked status until its token is loaded. Public Wiktionary/Wikidata/IBGE/Etymology Explorer operations do not require a provider token; their endpoints can retain one in memory but do not send it to a public provider unnecessarily. Rotating/clearing a credential discards that epoch's MCP bridge/cache; a request whose upload crosses rotation must retry and cannot instantiate a revoked credential.
 
 The research store uses the same `/health` and `/v1/credentials` bootstrap convention but keeps its existing `/v1/operations/OPERATION` application API. Its control credential only seeds/rotates the storage API token. Application operations use the seeded API token, and are unavailable while it is not loaded. Legacy standalone storage-token environment configuration remains supported when managed control mode is not enabled. Neo4j connection parameters are non-secret YAML settings; its optional password is supplied from the `neo4j` vault entry to the child process environment.
 
@@ -76,6 +76,10 @@ The fleet's programmatic `connection(id)` and `callTool(id, name, args)` methods
 
 Startup validates all enabled processes. On failure it stops only processes it launched. After successful startup, research cancellation first lets the runner save its final checkpoint/accounting, then closes the fleet. Normal completion also closes owned services. Credentials therefore disappear with those processes; restart unlocks and reseeds from the encrypted vault. Updating a vault entry affects the next startup unless an application deliberately invokes the rotation endpoint while running. Automatic child restart/hot vault reload is not implemented.
 
-## Etymology Explorer prerequisite
+## Etymology Explorer
 
-The official provider advertises a Vanguard API, but an executable integration still needs verified documentation for its URLs, operations, authentication scheme, response/error schemas, and provenance/reuse fields. No endpoint or authentication format has been guessed. The `etymology-explorer` entry remains disabled until that contract is supplied. A token alone is not sufficient to implement an unknown API; do not paste tokens into chat.
+Clone/build the sibling `names.api.etymology-explorer` checkout with `npm ci`. The default registry enables it on loopback port 4323. Its service ID is `etymology-explorer`; no provider credential or vault entry is needed. Disable its registry entry if that checkout is not installed.
+
+The client uses the confirmed `https://api.etymologyexplorer.com/staging/` base URL. The provider's old documentation links use dev; the implementation defaults to staging, verified with anonymous autocomplete/details/connections/trees reads. Private fleet access is available with `callTool('etymology-explorer', 'autocomplete', {word: 'David'})`; tools return bounded JSON chunks with provenance and a continuation snapshot.
+
+The new source is available to agents through its standalone MCP or managed local API. The root research model still has its four constrained tools and existing Wiktionary workflow; no unrestricted enrichment tools are added to that model. Unknown reuse rights default to metadata-only storage. Pronunciation media and error-list operations are outside the initial research adapter.
