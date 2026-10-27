@@ -4,3 +4,7 @@ dist/
 .env
 .superpowers/
 coverage/
+
+*.vault
+*.vault.*
+*.partial

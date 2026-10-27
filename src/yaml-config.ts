@@ -1,0 +1,2 @@
+import{readFile}from'node:fs/promises';import{parseDocument}from'yaml';
+export async function readConfigFile(file:string):Promise<unknown>{const raw=await readFile(file,'utf8');if(Buffer.byteLength(raw)>65536)throw Error('Configuration exceeds 64 KiB');const doc=parseDocument(raw,{uniqueKeys:true});if(doc.errors.length)throw Error('Invalid YAML/JSON configuration');return doc.toJS({maxAliasCount:0});}

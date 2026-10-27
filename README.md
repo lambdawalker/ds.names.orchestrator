@@ -1,92 +1,30 @@
 # ds.names.orchestrator
 
-Research personal-name roots with a local model through DeepSeek Harness. Names run sequentially, each with isolated sessions and durable checkpoints. Evidence and candidate roots are stored through [names.research.store](https://github.com/lambdawalker/names.research.store); source reads use [names.api.wiktionary](https://github.com/lambdawalker/names.api.wiktionary).
+Research personal-name roots using isolated, resumable DeepSeek Harness sessions and the research storage service. Proposed roots remain cited candidates for human review.
 
-This milestone finds candidate roots only. It does not expand adaptations/borrowings or certify etymological truth. A saved root has `status: candidate`, exact source fragments, original-language spelling, and an explicit link to the input name. The research task becomes `review_required`. A fluent prose answer alone cannot complete a task.
+The orchestrator now owns an **encrypted credential vault** and a **YAML-configured local service fleet**. Startup asks for a passphrase, launches enabled clients, verifies their boot identities, and injects API credentials into memory through authenticated loopback endpoints. Provider keys are not stored in YAML or generated MCP patches.
 
-## Requirements
+See [local services and encrypted credentials](docs/local-services.md) for the port registry, endpoint contract, migration, Linux/Windows setup and agent access.
 
-- Node.js 24+, npm and Git. See the client's [Linux setup guide](https://github.com/lambdawalker/names.api.wiktionary/blob/main/docs/linux-setup.md) for installing Node via nvm on Ubuntu/Debian/Fedora.
-- A running storage API with the root-task operations from [storage PR #2](https://github.com/lambdawalker/names.research.store/pull/2). Existing SQL stores acquire additive task tables at startup; no reset is required.
-- LM Studio or another OpenAI-compatible Chat Completions server with **streaming and tool calling** enabled. No particular model/quantization is selected as best; confirm the model's tools/chat template and actual context capacity on your hardware.
+## Start
 
-Public Wiktionary/WiktAPI reads need no provider credentials. The credential wizard is postponed. The existing storage API still requires its bearer token; the orchestrator uses the same `STORE_API_TOKEN` as the service. That token never enters model prompts or request bodies. An optional `MODEL_API_KEY` comes from your environment if the model endpoint requires authentication; a keyless local endpoint uses a nonsecret placeholder.
-
-## 1. Start storage
-
-Until the storage PR is merged, check out `feat/root-research-tasks` in the storage repository. Use `main` once merged.
-
-Linux/Bash, in a separate terminal:
-
-```bash
-git clone https://github.com/lambdawalker/names.research.store.git
-cd names.research.store
-git checkout feat/root-research-tasks
-npm ci
-export STORE_API_TOKEN="$(node -e 'process.stdout.write(require("node:crypto").randomBytes(32).toString("hex"))')"
-# Copy this value for the orchestrator terminal before starting the service:
-printf '%s\n' "$STORE_API_TOKEN"
-npm start
-```
-
-Windows/PowerShell:
-
-```powershell
-git clone https://github.com/lambdawalker/names.research.store.git
-cd names.research.store
-git checkout feat/root-research-tasks
-npm ci
-$env:STORE_API_TOKEN = node -e 'process.stdout.write(require("node:crypto").randomBytes(32).toString("hex"))'
-$env:STORE_API_TOKEN # Copy this value for the orchestrator terminal.
-npm start
-```
-
-The API listens on loopback port **4318** by default. Use the storage repository's instructions for Neo4j/Compose and persistent configuration. SQLite durably admits findings even if Neo4j is offline; graph projection remains pending until the worker applies it. Neo4j is not needed for the workflow tests or initial evidence admission, but is needed to query the graph.
-
-## 2. Start the local model
-
-In LM Studio, load a model that supports tool calling, configure its context window to match the project configuration, and start its local server. Its usual API base is `http://127.0.0.1:1234/v1`. See [LM Studio's OpenAI compatibility documentation](https://lmstudio.ai/docs/developer/openai-compat).
-
-Get the model identifier with `curl http://127.0.0.1:1234/v1/models` on Linux, or `Invoke-RestMethod http://127.0.0.1:1234/v1/models` in PowerShell. Set `model.id` to the returned model ID. `contextWindow` is routing metadata; the server must actually load the requested context. A 4090's usable context depends on weights/quantization/KV cache; these defaults are starting limits, not a VRAM benchmark.
-
-## 3. Install and configure the orchestrator
-
-```bash
-git clone https://github.com/lambdawalker/ds.names.orchestrator.git
-cd ds.names.orchestrator
-# Until the implementation PR is merged:
-git checkout feat/root-research
-npm ci
-npm run build
-```
-
-Dependencies use exact Git commits for the source/storage packages and an exact Harness developer-preview release. Git must be installed and able to reach GitHub. Allow npm's normal build lifecycle; `--ignore-scripts` prevents these Git packages from building their exports. The source/storage dependencies need not be published to npm. A separate storage **process** is still required: importing its validation contracts does not start the service.
-
-Linux:
-
-```bash
-cp config.example.json config.json
-export STORE_API_TOKEN='PASTE_THE_SAME_TOKEN_USED_BY_THE_STORAGE_SERVICE'
-```
-
-PowerShell:
-
-```powershell
-Copy-Item config.example.json config.json
-$env:STORE_API_TOKEN = 'PASTE_THE_SAME_TOKEN_USED_BY_THE_STORAGE_SERVICE'
-```
-
-**Edit `config.json` first**, replacing `REPLACE_WITH_LOADED_MODEL_ID`. Use your own contact User-Agent. `dataDir` is resolved relative to the launch directory; reuse the same directory/config when resuming. For inference on another machine, change the explicitly configured model base URL and enable that server's network listener. Remote storage URLs require HTTPS. Do not put tokens into JSON configuration.
-
-Then run (same command in Bash and PowerShell):
+Requires Node.js 24+, Git, built sibling client/database checkouts and a local OpenAI-compatible model with tool calling. Before this feature is merged, use the matching feature PR branches in the orchestrator and each managed service; older main checkouts do not contain the new bootstrap endpoints.
 
 ```sh
-npm start -- run --config config.json --names examples/names.json
+npm ci
+npm run vault:init
+# Only if needed:
+npm run vault:set -- behindthename
+npm run vault:set -- model
+# Edit model.id and checkout directories in config.default.yaml:
+npm start -- run --config config.default.yaml --names examples/names.json
 ```
 
-You may instead supply variables through a local ignored `.env` file; the `npm start` command loads it. The program does not provide an interactive credential/vault wizard.
+These commands work in Linux shells and PowerShell. Passphrases and provider tokens are entered through hidden terminal prompts, never command-line arguments. The generated storage API token lives in the encrypted vault. For a pre-existing external storage API, save its existing token with `npm run vault:set -- store` and disable managed startup of that service.
 
-The input is a UTF-8 JSON array of strings or `{ "name": "...", "language": "..." }` objects, up to 1000 names. Language is an optional source/context hint such as `Spanish` on English Wiktionary, not the edition. Include it for ambiguous spellings. Spelling case and accents are preserved. NFC-equivalent spellings share task identity; different language hints do not.
+Default ports are 4318 for storage, 4319 Wiktionary, 4320 Wikidata, 4321 Behind the Name and 4322 statistics. Etymology Explorer (4323) and Wikimedia Enterprise (4324) are reserved and disabled because their clients are not implemented. Etymology Explorer requires verified Vanguard API documentation before implementation.
+
+The root milestone still finds roots only. Adaptations, borrowing and other enrichment phases are not automatically enabled by launching additional clients. Managed Wiktionary lookups use the configured local port while preserving the existing source/claim validation boundary. An actual model/GPU benchmark remains a local validation step.
 
 ## Results and resuming
 
@@ -125,7 +63,7 @@ The SDK launches a patched `sdk-minimal` profile. Shell, filesystem/image tools,
 
 The model cannot choose arbitrary URLs, execute code, or submit unrestricted database findings. This tool profile is not an OS sandbox. Source text remains untrusted evidence. Citation validation proves traceability, not that the model interpreted the etymology correctly. Multiple-source corroboration and human review remain future work.
 
-The separate source client's read-only MCP is reusable by other agents. This runner imports the client library directly inside its research MCP; it does not need an additional HTTP API or a separately started client MCP process.
+The standalone source MCP remains reusable. With managed Wiktionary enabled, the private research worker reads from its authenticated local service port; externally managed mode retains direct public-library lookup. Model-facing root tools remain constrained.
 
 ## Verification
 

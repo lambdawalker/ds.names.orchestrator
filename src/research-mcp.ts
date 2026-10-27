@@ -1,6 +1,7 @@
 import { McpServer } from '@modelcontextprotocol/server';
 import { serveStdio } from '@modelcontextprotocol/server/stdio';
 import { WiktionaryClient } from '@lambdawalker/names-api-wiktionary';
+import {PortWiktionaryClient} from './port-client.js';
 import { ConfigSchema } from './config.js';
 import { StorageClient } from './store-client.js';
 import { ResearchTools, toolSchemas } from './research-tools.js';
@@ -31,6 +32,6 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     const config = ConfigSchema.parse(JSON.parse(process.env.NAMES_RUN_CONFIG ?? '{}'));
     const id = process.env.NAMES_TASK_ID; if (!id) throw Error('NAMES_TASK_ID is required');
     const storage = new StorageClient(config.store.baseUrl, process.env.STORE_API_TOKEN ?? '');
-    await serveStdio(() => createResearchMcp(new ResearchTools(storage, new WiktionaryClient({ userAgent: config.userAgent }), id, config)));
+    await serveStdio(() => createResearchMcp(new ResearchTools(storage, (process.env.NAMES_WIKTIONARY_URL?new PortWiktionaryClient(process.env.NAMES_WIKTIONARY_URL,process.env.NAMES_WIKTIONARY_CONTROL??''):new WiktionaryClient({ userAgent: config.userAgent })), id, config)));
   } catch { console.error('Research MCP startup failed; check orchestrator configuration and storage token.'); process.exitCode = 1; }
 }

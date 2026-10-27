@@ -1,0 +1,19 @@
+# Non-secret local configuration. Paths are relative to the launch directory.
+userAgent: NamesResearch/0.1 (https://github.com/lambdawalker/ds.names.orchestrator)
+store:
+  baseUrl: http://127.0.0.1:4318
+model:
+  baseUrl: http://127.0.0.1:1234/v1
+  id: REPLACE_WITH_LOADED_MODEL_ID
+  contextWindow: 16384
+  maxOutputTokens: 2048
+dataDir: .data
+vaultFile: .data/credentials.vault
+services:
+  store: {directory: ../names.research.store, port: 4318}
+  wiktionary: {directory: ../names.api.wiktionary, port: 4319}
+  wikidata: {directory: ../names.api.wikidata, port: 4320}
+  behindthename: {directory: ../names.api.behindthename, port: 4321}
+  statistics: {directory: ../names.data.statistics, port: 4322}
+  etymology-explorer: {directory: ../names.api.etymology-explorer, port: 4323, enabled: false}
+  wikimedia-enterprise: {directory: ../names.api.wikimedia-enterprise, port: 4324, enabled: false}
