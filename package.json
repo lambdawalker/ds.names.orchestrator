@@ -13,18 +13,21 @@
     "typecheck": "tsc -p tsconfig.test.json",
     "pretest": "npm run build",
     "test": "vitest run",
-    "start": "node --env-file-if-exists=.env dist/cli.js"
+    "start": "node --env-file-if-exists=.env dist/cli.js",
+    "vault:init": "node dist/vault-cli.js init",
+    "vault:set": "node dist/vault-cli.js set"
   },
   "dependencies": {
     "@deepseek-ai/cordis": "4.0.5",
     "@deepseek-ai/dsh-agent": "0.2.1-rc.3",
-    "@deepseek-ai/dsh-token-meter": "0.2.1-rc.3",
-    "@deepseek-ai/dsh-sdk-client": "0.2.1-rc.3",
     "@deepseek-ai/dsh-llm-pi-ai": "0.2.1-rc.3",
     "@deepseek-ai/dsh-mcp-client": "0.2.1-rc.3",
-    "@modelcontextprotocol/server": "2.4.0",
+    "@deepseek-ai/dsh-sdk-client": "0.2.1-rc.3",
+    "@deepseek-ai/dsh-token-meter": "0.2.1-rc.3",
     "@lambdawalker/names-api-wiktionary": "git+https://github.com/lambdawalker/names.api.wiktionary.git#e9e8b67dbf6b09f0b3178c87569ddae81d059a77",
     "@lambdawalker/names-research-store": "git+https://github.com/lambdawalker/names.research.store.git#58ad54e0e9f913c3ab600ccf346846a08f0559c4",
+    "@modelcontextprotocol/server": "2.4.0",
+    "yaml": "2.9.1",
     "zod": "4.6.7"
   },
   "devDependencies": {
