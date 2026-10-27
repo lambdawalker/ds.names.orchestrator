@@ -1,0 +1,41 @@
+{
+  "name": "@lambdawalker/ds-names-orchestrator",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "prepare": "npm run build",
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.test.json",
+    "pretest": "npm run build",
+    "test": "vitest run",
+    "start": "node --env-file-if-exists=.env dist/cli.js"
+  },
+  "dependencies": {
+    "@deepseek-ai/cordis": "4.0.5",
+    "@deepseek-ai/dsh-agent": "0.2.1-rc.3",
+    "@deepseek-ai/dsh-token-meter": "0.2.1-rc.3",
+    "@deepseek-ai/dsh-sdk-client": "0.2.1-rc.3",
+    "@deepseek-ai/dsh-llm-pi-ai": "0.2.1-rc.3",
+    "@deepseek-ai/dsh-mcp-client": "0.2.1-rc.3",
+    "@modelcontextprotocol/server": "2.4.0",
+    "@lambdawalker/names-api-wiktionary": "git+https://github.com/lambdawalker/names.api.wiktionary.git#e9e8b67dbf6b09f0b3178c87569ddae81d059a77",
+    "@lambdawalker/names-research-store": "git+https://github.com/lambdawalker/names.research.store.git#58ad54e0e9f913c3ab600ccf346846a08f0559c4",
+    "zod": "4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "7.0.2",
+    "vitest": "5.0.5"
+  },
+  "overrides": {
+    "zod": "$zod",
+    "undici": "8.12.3",
+    "fflate": "0.8.3",
+    "@modelcontextprotocol/client": "2.4.0"
+  }
+}

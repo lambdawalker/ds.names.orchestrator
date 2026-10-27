@@ -1,0 +1,7 @@
+{
+  "userAgent": "NamesResearch/0.1 (https://github.com/lambdawalker/ds.names.orchestrator)",
+  "store": { "baseUrl": "http://127.0.0.1:4318" },
+  "model": { "baseUrl": "http://127.0.0.1:1234/v1", "id": "REPLACE_WITH_LOADED_MODEL_ID", "contextWindow": 16384, "maxOutputTokens": 2048 },
+  "dataDir": ".data",
+  "budgets": { "maxSessions": 4, "maxSessionSteps": 6, "maxTools": 24, "maxLookups": 8, "maxSessionMs": 180000, "maxNameMs": 600000 }
+}
