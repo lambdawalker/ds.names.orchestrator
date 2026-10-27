@@ -22,7 +22,7 @@ npm start -- run --config config.default.yaml --names examples/names.json
 
 These commands work in Linux shells and PowerShell. Passphrases and provider tokens are entered through hidden terminal prompts, never command-line arguments. The generated storage API token lives in the encrypted vault. For a pre-existing external storage API, save its existing token with `npm run vault:set -- store` and disable managed startup of that service.
 
-Default ports are 4318 for storage, 4319 Wiktionary, 4320 Wikidata, 4321 Behind the Name, 4322 statistics and 4323 Etymology Explorer. Etymology Explorer uses the confirmed staging API without a provider token. Wikimedia Enterprise (4324) remains reserved and disabled because its client is not implemented.
+Default ports are 4318 for storage, 4319 Wiktionary, 4320 Wikidata, 4321 Behind the Name, 4322 statistics and 4323 Etymology Explorer. Etymology Explorer uses the confirmed staging API without a provider token. Wikimedia Enterprise (4324) is implemented and disabled by default until account setup. Run `npm run vault:enterprise-login`, then enable its service entry.
 
 The root milestone still finds roots only. Adaptations, borrowing and other enrichment phases are not automatically enabled by launching additional clients. Managed Wiktionary lookups use the configured local port while preserving the existing source/claim validation boundary. An actual model/GPU benchmark remains a local validation step.
 
@@ -75,3 +75,4 @@ npm run typecheck
 The tests include the **actual Harness subprocess**, stdio MCP, authenticated HTTP and SQLite storage, with a scripted local OpenAI-compatible model. They verify the advertised four-tool roster and that the storage token is absent from model requests. No GPU, real LLM, external provider key, or Neo4j is required for those tests. Live model quality/VRAM must be checked on your own machine.
 
 Code is MIT. Source evidence retains provider terms and attribution; candidate research output is not a public-redistribution clearance decision. See the [design](docs/superpowers/specs/2026-10-27-root-research-design.md) and [plan](docs/superpowers/plans/2026-10-27-root-research.md).
+

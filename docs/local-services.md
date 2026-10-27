@@ -12,7 +12,7 @@ The orchestrator owns the credential vault and the local process fleet. On start
 | Behind the Name | 4321 | Implemented; provider key needed for lookups |
 | Official statistics | 4322 | Implemented |
 | Etymology Explorer | 4323 | Implemented; anonymous staging reads |
-| Wikimedia Enterprise | 4324 | Reserved, unimplemented |
+| Wikimedia Enterprise | 4324 | Implemented; enable after account setup |
 
 Each implemented API project ships `config.default.yaml` with its standalone loopback port. The orchestrator's `config.default.yaml` is the launch registry: it supplies each enabled checkout directory and port, overrides that child's port at launch, and rejects collisions before starting anything. Edit this registry when choosing different managed ports. It accepts no credential values. Checkouts need `npm ci`/a completed build before startup.
 
@@ -83,3 +83,12 @@ Clone/build the sibling `names.api.etymology-explorer` checkout with `npm ci`. T
 The client uses the confirmed `https://api.etymologyexplorer.com/staging/` base URL. The provider's old documentation links use dev; the implementation defaults to staging, verified with anonymous autocomplete/details/connections/trees reads. Private fleet access is available with `callTool('etymology-explorer', 'autocomplete', {word: 'David'})`; tools return bounded JSON chunks with provenance and a continuation snapshot.
 
 The new source is available to agents through its standalone MCP or managed local API. The root research model still has its four constrained tools and existing Wiktionary workflow; no unrestricted enrichment tools are added to that model. Unknown reuse rights default to metadata-only storage. Pronunciation media and error-list operations are outside the initial research adapter.
+
+
+## Wikimedia Enterprise
+
+Build the sibling `names.api.wikimedia-enterprise` checkout with `npm ci`, then run `npm run vault:enterprise-login` in this orchestrator. It reads the trusted configured client directory, validates the existing vault passphrase, asks for your Enterprise username/password without echo, calls the compiled client login helper and encrypts only the access/refresh bundle. The password is not persisted and tokens are not printed. `--config PATH` and optional `--file PATH` select a non-default setup.
+
+Set `services.wikimedia-enterprise.enabled: true` after setup. It defaults to false so accounts are optional. The managed service uses loopback port 4324 and ID `wikimedia-enterprise`, receives its credential bundle in memory and renews access tokens with the stored refresh token. Rotating or clearing credentials closes the old authentication session/cache. A raw access token can instead be set with `npm run vault:set -- wikimedia-enterprise`, but cannot renew itself. Refreshed access tokens are memory-only; rerun login when the provider refresh lifetime/count allowance is exhausted.
+
+Fourteen read-only MCP tools expose metadata, exact-title project-filtered articles, snapshot/chunk metadata and archive HEAD inspection. Explicit bounded archive downloads remain library/CLI operations; no model tool accepts a destination path or exposes a presigned URL. Root model tool scope remains unchanged. Live provider validation needs your local account; CI uses synthetic credentials.

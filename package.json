@@ -15,7 +15,8 @@
     "test": "vitest run",
     "start": "node --env-file-if-exists=.env dist/cli.js",
     "vault:init": "node dist/vault-cli.js init",
-    "vault:set": "node dist/vault-cli.js set"
+    "vault:set": "node dist/vault-cli.js set",
+    "vault:enterprise-login": "node dist/enterprise-login-cli.js"
   },
   "dependencies": {
     "@deepseek-ai/cordis": "4.0.5",
