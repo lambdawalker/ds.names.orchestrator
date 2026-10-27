@@ -15,5 +15,5 @@ services:
   wikidata: {directory: ../names.api.wikidata, port: 4320}
   behindthename: {directory: ../names.api.behindthename, port: 4321}
   statistics: {directory: ../names.data.statistics, port: 4322}
-  etymology-explorer: {directory: ../names.api.etymology-explorer, port: 4323, enabled: false}
+  etymology-explorer: {directory: ../names.api.etymology-explorer, port: 4323}
   wikimedia-enterprise: {directory: ../names.api.wikimedia-enterprise, port: 4324, enabled: false}
